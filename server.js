@@ -13,6 +13,7 @@ const groupsRoutes = require("./routes/groups");
 const boardMessagesRoute = require("./routes/boardMessages");
 const spotifyRoute = require("./routes/spotify");
 const errorHandler = require("./middleware/errorHandler");
+const rateLimit = require("./config/rateLimit");
 
 const app = express();
 const PORT = process.env.PORT || 3500;
@@ -43,9 +44,10 @@ app.use(function (req, res, next) {
 });
 
 app.use(helmet());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: "1mb" }));
+app.use(bodyParser.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cookieParser());
+app.use(rateLimit);
 
 // App routes
 app.use("/", registerRoute);
@@ -65,4 +67,6 @@ mongoose.connection.once("open", () => {
   });
 });
 
-mongoose.connection.on("error", (err) => {});
+mongoose.connection.on("error", (err) => {
+  console.log("MongoDB Error");
+});
